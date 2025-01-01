@@ -1,13 +1,48 @@
-// Script Author by NoCrypt
-// Script Modified by ANXETY
+// FUNNY
+// Change the tab icon to a purple heart symbol
+const link = document.createElement('link');
+link.rel = 'icon';
+link.href = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="purple" viewBox="0 0 16 16"><text x="0" y="12" font-size="12">💜</text></svg>';
+document.head.appendChild(link);
+
+// TIMER
+// Language settings
+const translationsTimer = {
+    "en": {
+        connecting: "Connecting...",
+        refreshTooltip: "Click to refresh.",
+        muteTooltip: "Currently not-muted. Click to mute.",
+        unmuteTooltip: "Currently muted. Click to unmute.",
+        blurTooltip: "Toggle NSFW Blur. Click to blur.",
+        unblurTooltip: "Toggle NSFW Blur. Click to unblur.",
+        civitaiTooltip: "Go to CivitAI.",
+        pinggyMessage: "Recreate the Pinggy tunnel!",
+        error: "Error: ",
+    },
+    "ru": {
+        connecting: "Подключение...",
+        refreshTooltip: "Нажмите, чтобы обновить.",
+        muteTooltip: "Звук включен. Нажмите, чтобы отключить.",
+        unmuteTooltip: "Звук отключен. Нажмите, чтобы включить.",
+        blurTooltip: "Переключить размытие NSFW. Нажмите, чтобы размыть.",
+        unblurTooltip: "Переключить размытие NSFW. Нажмите, чтобы убрать размытие.",
+        civitaiTooltip: "Перейти на CivitAI.",
+        pinggyMessage: "Пересоздайте туннель Pinggy!",
+        error: "Ошибка: ",
+    },
+};
+
+// Detect UserLang
+const userLang = (navigator.language || navigator.userLanguage).split('-')[0];
+const t = translationsTimer[userLang] || translationsTimer["en"]; // Fallback to English if language not supported
 
 // Constants
-const CLOCK_ICON = "https://raw.githubusercontent.com/anxety-solo/webui_timer/refs/heads/main/__files__/icon/clock.svg";
-const ALARM_BELL_ICON = "https://raw.githubusercontent.com/anxety-solo/webui_timer/refs/heads/main/__files__/icon/alarm-bell.svg";
-const ALARM_BELL_CANCELLED_ICON = "https://raw.githubusercontent.com/anxety-solo/webui_timer/refs/heads/main/__files__/icon/alarm-bell-cancelled.svg";
-const EYE_ICON = "https://raw.githubusercontent.com/anxety-solo/webui_timer/refs/heads/main/__files__/icon/eye.svg";
-const EYE_CANCELLED_ICON = "https://raw.githubusercontent.com/anxety-solo/webui_timer/refs/heads/main/__files__/icon/eye-cancelled.svg";
-const CIVITAI_ICON = "https://raw.githubusercontent.com/anxety-solo/webui_timer/refs/heads/main/__files__/icon/CivitAi_Icon.svg";
+const CLOCK_ICON = "file=extensions/timer/__files__/icon/clock.svg";
+const ALARM_BELL_ICON = "file=extensions/timer/__files__/icon/alarm-bell.svg";
+const ALARM_BELL_CANCELLED_ICON = "file=extensions/timer/__files__/icon/alarm-bell-cancelled.svg";
+const EYE_ICON = "file=extensions/timer/__files__/icon/eye.svg";
+const EYE_CANCELLED_ICON = "file=extensions/timer/__files__/icon/eye-cancelled.svg";
+const CIVITAI_ICON = "file=extensions/timer/__files__/icon/CivitAi_Icon.svg";
 const CIVITAI_URL = "https://civitai.com/models";
 const TIMER_FILE = "file=static/timer.txt";
 const PINGGY_TIMER_FILE = "file=static/timer-pinggy.txt";
@@ -31,7 +66,7 @@ class Timer {
 
         if (this.isPinggy && timeLeft <= 0) {
             this.stop();
-            this.element.innerText = "Recreate the Pinggy tunnel!";
+            this.element.innerText = t.pinggyMessage;
             return; // Stop further updates
         }
 
@@ -46,7 +81,7 @@ class Timer {
 
     async refresh() {
         clearTimeout(this.timeout);
-        this.element.innerText = "Connecting...";
+        this.element.innerText = t.connecting;
 
         const currentUrl = window.location.href;
         this.isPinggy = currentUrl.includes("a.free.pinggy.link");
@@ -65,7 +100,7 @@ class Timer {
             this.update();
         } catch (error) {
             console.error("Error refreshing timer:", error);
-            this.element.innerText = "Error: " + error.message;
+            this.element.innerText = t.error + error.message;
         }
     }
 
@@ -92,7 +127,7 @@ function toggleNotification(audio, button, image) {
     if (!audio.muted) {
         audio.play().catch(e => console.error("Error playing notification sound:", e));
     }
-    button.title = audio.muted ? "Currently muted. Click to unmute." : "Currently not-muted. Click to mute.";
+    button.title = audio.muted ? t.unmuteTooltip : t.muteTooltip;
     button.style.borderColor = audio.muted ? "#FF005D" : "#00FF8C";
     button.style.backgroundColor = audio.muted ? "rgba(255, 0, 93, 0.08)" : "rgba(0, 255, 140, 0.08)";
     image.src = audio.muted ? ALARM_BELL_CANCELLED_ICON : ALARM_BELL_ICON;
@@ -103,7 +138,7 @@ function toggleNSFWBlur(button, image) {
     const i2iGallery = gradioApp().querySelector("#img2img_gallery_container");
     const isBlurred = button.classList.toggle("nsfw_blurred");
 
-    button.title = `Toggle NSFW Blur. Click to ${isBlurred ? "unblur" : "blur"}`;
+    button.title = isBlurred ? t.unblurTooltip : t.blurTooltip;
     button.style.borderColor = isBlurred ? "#FF005D" : "#00FF8C";
     button.style.backgroundColor = isBlurred ? "rgba(255, 0, 93, 0.08)" : "rgba(0, 255, 140, 0.08)";
     image.src = isBlurred ? EYE_CANCELLED_ICON : EYE_ICON;
@@ -127,12 +162,12 @@ function createTimer() {
     // Timer
     const timerDiv = createElement("div", "gr-box", {
         style: "display: flex; gap: 0.3rem; align-items: center; padding: 3px 5px; border: solid 1px #00FFFF; border-radius: 10px; background-color: rgba(0, 255, 255, 0.08) !important; cursor: pointer;",
-        title: "Click to refresh."
+        title: t.refreshTooltip
     });
     const timerImage = createElement("img", "", { src: CLOCK_ICON, width: 24 });
     const timerElement = createElement("div", "", {
         style: "font-family: monospace; color: #00FFFF; text-align: center; flex-grow: 1;",
-        textContent: "Connecting..."
+        textContent: t.connecting
     });
     timerDiv.append(timerImage, timerElement);
     const timer = new Timer(timerElement);
@@ -141,8 +176,8 @@ function createTimer() {
 
     // Audio notification
     const audioDiv = createElement("div", "gr-box", {
-        style: "display: flex; align-items: center; padding: 5px; border: solid 1px #00FF8C; border-radius: 10px; background-color: rgba(0, 255, 140, 0.08) !important; cursor: pointer; height: auto; width: auto;",
-        title: "Currently not-muted. Click to mute."
+        style: "transition: all 0.15s ease; display: flex; align-items: center; padding: 5px; border: solid 1px #00FF8C; border-radius: 10px; background-color: rgba(0, 255, 140, 0.08) !important; cursor: pointer; height: auto; width: auto;",
+        title: t.muteTooltip
     });
     const audioImage = createElement("img", "", { src: ALARM_BELL_ICON, width: 20 });
     audioDiv.appendChild(audioImage);
@@ -151,8 +186,8 @@ function createTimer() {
 
     // NSFW Blur
     const nsfwDiv = createElement("div", "gr-box", {
-        style: "display: flex; align-items: center; padding: 5px; border: solid 1px #00FF8C; border-radius: 10px; background-color: rgba(0, 255, 140, 0.08) !important; cursor: pointer; height: auto; width: auto;",
-        title: "Toggle NSFW Blur. Click to blur"
+        style: "transition: all 0.15s ease; display: flex; align-items: center; padding: 5px; border: solid 1px #00FF8C; border-radius: 10px; background-color: rgba(0, 255, 140, 0.08) !important; cursor: pointer; height: auto; width: auto;",
+        title: t.blurTooltip
     });
     const nsfwImage = createElement("img", "", { src: EYE_ICON, width: 20 });
     nsfwDiv.appendChild(nsfwImage);
@@ -162,7 +197,7 @@ function createTimer() {
     // CivitAI link
     const civitDiv = createElement("div", "gr-box", {
         style: "display: flex; align-items: center; padding: 5px; border: solid 1px #3399FF; border-radius: 10px; background-color: rgba(51, 153, 255, 0.08) !important; cursor: pointer; height: auto; width: auto;",
-        title: "Go to CivitAI"
+        title: t.civitaiTooltip
     });
     const civitImage = createElement("img", "", { src: CIVITAI_ICON, width: 20 });
     civitDiv.appendChild(civitImage);
