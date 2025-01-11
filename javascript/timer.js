@@ -1,10 +1,3 @@
-// *FUNNY*
-// Change the tab icon to a purple heart symbol.
-const link = document.createElement('link');
-link.rel = 'icon';
-link.href = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="purple" viewBox="0 0 16 16"><text x="0" y="12" font-size="12">💜</text></svg>';
-document.head.appendChild(link);
-
 // Language settings
 const translationsTimer = {
     "en": {
@@ -35,7 +28,6 @@ const translationsTimer = {
 const userLang = (navigator.language || navigator.userLanguage).split('-')[0];
 const t = translationsTimer[userLang] || translationsTimer["en"];
 
-// *TIMER*
 // Constants
 const BASEPATH = document.currentScript.src.split('file=')[1].split('/').slice(0, 2).join('/');
 const ICONS = {
