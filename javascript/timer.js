@@ -78,12 +78,7 @@ class Timer {
         const minutes = String(Math.floor((timeLeft / 60) % 60)).padStart(2, '0');
         const seconds = String(Math.floor(timeLeft % 60)).padStart(2, '0');
 
-        // Format the time based on the type of timer
-        if (this.isPinggy) {
-            return `${minutes}:${seconds}`;          // MM:SS format for Pinggy
-        } else {
-            return `${hours}:${minutes}:${seconds}`; // HH:MM:SS format for others
-        }
+        return this.isPinggy ? `${minutes}:${seconds}` : `${hours}:${minutes}:${seconds}`;
     }
 
     async refresh() {
@@ -121,15 +116,55 @@ function createElement(tag, className, attributes = {}, children = []) {
     return element;
 }
 
-// Helper function to find audio element with version detection
+// Improved Shadow DOM traversal
+function traverseShadowDOM(root, callback) {
+    if (!root) return;
+
+    // Check if current root is element with shadow
+    if (root instanceof Element && root.shadowRoot) {
+        callback(root.shadowRoot);
+        traverseShadowDOM(root.shadowRoot, callback);
+    }
+
+    // Process children
+    root.childNodes.forEach(child => {
+        if (child.nodeType === Node.ELEMENT_NODE) {
+            callback(child);
+            traverseShadowDOM(child, callback);
+        }
+    });
+}
+
+// Modern audio element detection
 function findAudioElement() {
-    // For Gradio 3.x
+    // Try legacy Gradio 3.x format first
     const legacyAudio = gradioApp().querySelector("#audio_notification > audio");
     if (legacyAudio) return legacyAudio;
 
-    // For Gradio 4.x+
+    let foundAudio = null;
+    
+    // Search through all elements including Shadow DOM
+    traverseShadowDOM(gradioApp(), node => {
+        if (!foundAudio && node.tagName === 'AUDIO') {
+            foundAudio = node;
+        }
+    });
 
-    console.error("Audio element not found in DOM structure:", gradioApp().innerHTML);
+    if (foundAudio) return foundAudio;
+
+    // Fallback: search via play button
+    const playButton = gradioApp().querySelector(
+        '[aria-label="Воспроизвести"], [aria-label="Play"], [aria-label="Playback"]'
+    );
+    
+    if (playButton) {
+        let parentComponent = playButton.closest('gradio-audio, [data-testid="audio-component"]');
+        if (parentComponent && parentComponent.shadowRoot) {
+            return parentComponent.shadowRoot.querySelector('audio');
+        }
+    }
+
+    console.error("Audio element not found in DOM structure");
     return null;
 }
 
