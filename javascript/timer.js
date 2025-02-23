@@ -24,19 +24,19 @@ const translationsTimer = {
     },
 };
 
-// Detect UserLang
+// Detect User Language
 const userLang = (navigator.language || navigator.userLanguage).split('-')[0];
 const t = translationsTimer[userLang] || translationsTimer["en"];
 
 // Constants
 const BASEPATH = document.currentScript.src.split('file=')[1].split('/').slice(0, 2).join('/');
 const ICONS = {
-    CLOCK:                  `file=${BASEPATH}/__files__/icon/clock.svg`,
-    ALARM_BELL:             `file=${BASEPATH}/__files__/icon/alarm-bell.svg`,
-    ALARM_BELL_CANCELLED:   `file=${BASEPATH}/__files__/icon/alarm-bell-cancelled.svg`,
-    EYE:                    `file=${BASEPATH}/__files__/icon/eye.svg`,
-    EYE_CANCELLED:          `file=${BASEPATH}/__files__/icon/eye-cancelled.svg`,
-    CIVITAI:                `file=${BASEPATH}/__files__/icon/CivitAi_Icon.svg`,
+    CLOCK: `file=${BASEPATH}/__files__/icon/clock.svg`,
+    ALARM_BELL: `file=${BASEPATH}/__files__/icon/alarm-bell.svg`,
+    ALARM_BELL_CANCELLED: `file=${BASEPATH}/__files__/icon/alarm-bell-cancelled.svg`,
+    EYE: `file=${BASEPATH}/__files__/icon/eye.svg`,
+    EYE_CANCELLED: `file=${BASEPATH}/__files__/icon/eye-cancelled.svg`,
+    CIVITAI: `file=${BASEPATH}/__files__/icon/CivitAi_Icon.svg`,
 };
 const CIVITAI_URL = "https://civitai.com/models";
 const TIMER_FILES = {
@@ -120,7 +120,7 @@ function createElement(tag, className, attributes = {}, children = []) {
 function traverseShadowDOM(root, callback) {
     if (!root) return;
 
-    // Check if current root is element with shadow
+    // Check if current root is an element with shadow
     if (root instanceof Element && root.shadowRoot) {
         callback(root.shadowRoot);
         traverseShadowDOM(root.shadowRoot, callback);
@@ -137,12 +137,25 @@ function traverseShadowDOM(root, callback) {
 
 // Modern audio element detection
 function findAudioElement() {
-    // Try legacy Gradio 3.x format first
+    // Gradio 3.x
     const legacyAudio = gradioApp().querySelector("#audio_notification > audio");
     if (legacyAudio) return legacyAudio;
 
+    // Mobile
+    const mobileSelectors = [
+        '[aria-label="Play audio"]', 
+        '.mobile-audio-player',
+        'audio[controls]:not([hidden])'
+    ];
+
+    for (const selector of mobileSelectors) {
+        const audio = gradioApp().querySelector(selector);
+        if (audio) return audio;
+    }
+
+    // Gradio 4.x
     let foundAudio = null;
-    
+
     // Search through all elements including Shadow DOM
     traverseShadowDOM(gradioApp(), node => {
         if (!foundAudio && node.tagName === 'AUDIO') {
@@ -156,7 +169,7 @@ function findAudioElement() {
     const playButton = gradioApp().querySelector(
         '[aria-label="Воспроизвести"], [aria-label="Play"], [aria-label="Playback"]'
     );
-    
+
     if (playButton) {
         let parentComponent = playButton.closest('gradio-audio, [data-testid="audio-component"]');
         if (parentComponent && parentComponent.shadowRoot) {
@@ -171,25 +184,33 @@ function findAudioElement() {
 // Toggle functions
 function toggleNotification(button, image) {
     const audio = findAudioElement();
-    if (!audio) {
-        console.error("Could not find audio element!");
-        return;
-    }
+    if (!audio) return;
 
-    try {
-        audio.muted = !audio.muted;
+    const activateAudio = () => {
+        const newMutedState = !audio.muted;
+        audio.muted = newMutedState;
         audio.currentTime = 0;
         
-        if (!audio.muted) {
+        if (newMutedState) {
+            audio.pause();
+        } else {
             audio.play().catch(e => console.error("Playback error:", e));
         }
 
-        button.title = audio.muted ? t.unmuteTooltip : t.muteTooltip;
-        button.style.borderColor = audio.muted ? "#FF005D" : "#00FF8C";
-        button.style.backgroundColor = audio.muted ? "#FF005D14" : "#00FF8C14";
-        image.src = audio.muted ? ICONS.ALARM_BELL_CANCELLED : ICONS.ALARM_BELL;
-    } catch (e) {
-        console.error("Audio control error:", e);
+        button.title = newMutedState ? t.unmuteTooltip : t.muteTooltip;
+        button.style.borderColor = newMutedState ? "#FF005D" : "#00FF8C";
+        button.style.backgroundColor = newMutedState ? "#FF005D14" : "#00FF8C14";
+        image.src = newMutedState ? ICONS.ALARM_BELL_CANCELLED : ICONS.ALARM_BELL;
+    };
+
+    // For mobile devices
+    if (/Mobi|Android/i.test(navigator.userAgent)) {
+        activateAudio();
+        if (!audio.muted) {
+            audio.play()
+        }
+    } else {
+        activateAudio();
     }
 }
 
@@ -213,7 +234,7 @@ function createTimer() {
 
     // Create main div
     const mainDiv = createElement("div", "anxety-timer justify-start", {
-        style: "display: flex; gap: 8px; user-select: none; margin-block: -8px; align-items: center; z-index: 999;"
+        style: "display: flex; gap: 4px; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; margin-block: -8px; align-items: center; z-index: 999;"
     });
 
     // Timer
@@ -261,9 +282,10 @@ function createTimer() {
     civitDiv.addEventListener("click", () => window.open(CIVITAI_URL, '_blank'));
     mainDiv.appendChild(civitDiv);
 
+    // Start the timer
     timer.start();
 
-    // Inject blur CSS only if not already present
+    // Inject blur CSS
     if (!document.getElementById("nsfw-blur-css")) {
         const style = document.createElement("style");
         style.id = "nsfw-blur-css";
