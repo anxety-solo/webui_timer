@@ -199,7 +199,7 @@ function toggleNotification(button, image) {
 
         button.title = newMutedState ? t.unmuteTooltip : t.muteTooltip;
         button.style.borderColor = newMutedState ? "#FF005D" : "#00FF8C";
-        button.style.backgroundColor = newMutedState ? "#FF005D1F" : "#00FF8C1F";
+        button.style.backgroundColor = newMutedState ? "#FF005D1A" : "#00FF8C1A";
         image.src = newMutedState ? ICONS.ALARM_BELL_CANCELLED : ICONS.ALARM_BELL;
     };
 
@@ -221,7 +221,7 @@ function toggleNSFWBlur(button, image) {
 
     button.title = isBlurred ? t.unblurTooltip : t.blurTooltip;
     button.style.borderColor = isBlurred ? "#FF005D" : "#00FF8C";
-    button.style.backgroundColor = isBlurred ? "#FF005D1F" : "#00FF8C1F";
+    button.style.backgroundColor = isBlurred ? "#FF005D1A" : "#00FF8C1A";
     image.src = isBlurred ? ICONS.EYE_CANCELLED : ICONS.EYE;
 
     [t2iGallery, i2iGallery].forEach(gallery => gallery.classList.toggle("anxety-blur", isBlurred));
@@ -239,7 +239,7 @@ function createTimer() {
 
     // Timer
     const timerDiv = createElement("div", "gr-box", {
-        style: "display: flex; gap: 0.3rem; align-items: center; padding: 3px 5px; border: solid 1px #00FFFF; border-radius: 10px; background-color: #00FFFF1F !important; cursor: pointer;",
+        style: "display: flex; gap: 0.3rem; align-items: center; padding: 3px 5px; border: solid 1px #00FFFF; border-radius: 10px; background-color: #00FFFF1A !important; cursor: pointer;",
         title: t.refreshTooltip
     });
     const timerImage = createElement("img", "", { src: ICONS.CLOCK, width: 24 });
@@ -254,7 +254,7 @@ function createTimer() {
 
     // Audio notification
     const audioDiv = createElement("div", "gr-box", {
-        style: "transition: all 0.15s ease; display: flex; align-items: center; padding: 5px; border: solid 1px #00FF8C; border-radius: 10px; background-color: #00FF8C1F !important; cursor: pointer;",
+        style: "transition: all 0.15s ease; display: flex; align-items: center; padding: 5px; border: solid 1px #00FF8C; border-radius: 10px; background-color: #00FF8C1A !important; cursor: pointer;",
         title: t.muteTooltip
     });
     const audioImage = createElement("img", "", { src: ICONS.ALARM_BELL, width: 20 });
@@ -264,7 +264,7 @@ function createTimer() {
 
     // NSFW Blur
     const nsfwDiv = createElement("div", "gr-box", {
-        style: "transition: all 0.15s ease; display: flex; align-items: center; padding: 5px; border: solid 1px #00FF8C; border-radius: 10px; background-color: #00FF8C1F !important; cursor: pointer;",
+        style: "transition: all 0.15s ease; display: flex; align-items: center; padding: 5px; border: solid 1px #00FF8C; border-radius: 10px; background-color: #00FF8C1A !important; cursor: pointer;",
         title: t.blurTooltip
     });
     const nsfwImage = createElement("img", "", { src: ICONS.EYE, width: 20 });
@@ -274,7 +274,7 @@ function createTimer() {
 
     // CivitAI link
     const civitDiv = createElement("div", "gr-box", {
-        style: "display: flex; align-items: center; padding: 5px; border: solid 1px #3399FF; border-radius: 10px; background-color: #3399FF1F !important; cursor: pointer;",
+        style: "display: flex; align-items: center; padding: 5px; border: solid 1px #3399FF; border-radius: 10px; background-color: #3399FF1A !important; cursor: pointer;",
         title: t.civitaiTooltip
     });
     const civitImage = createElement("img", "", { src: ICONS.CIVITAI, width: 20 });
