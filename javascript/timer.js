@@ -234,7 +234,7 @@ function createTimer() {
 
     // Create main div
     const mainDiv = createElement("div", "anxety-timer justify-start", {
-        style: "display: flex; gap: 6px; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; margin-block: -8px; align-items: center; z-index: 999;"
+        style: "display: flex; gap: 6px; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; margin-block: -8px; align-items: center;" // remove: z-index: 999;
     });
 
     // Timer
