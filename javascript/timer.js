@@ -1,3 +1,24 @@
+// Logger class for consistent logging
+class Logger {
+    constructor(prefix) {
+        this.prefix = prefix;
+    }
+
+    log(message) {
+        console.log(`[${this.prefix}]: ${message}`);
+    }
+
+    error(message) {
+        console.error(`[${this.prefix}]: ${message}`);
+    }
+
+    warn(message) {
+        console.warn(`[${this.prefix}]: ${message}`);
+    }
+}
+
+const logger = new Logger('WebUI-Timer');
+
 // Language settings
 const translationsTimer = {
     "en": {
@@ -46,11 +67,19 @@ const TIMER_FILES = {
 
 // Timer class
 class Timer {
-    constructor(element, isPinggy) {
+    constructor(element) {
         this.element = element;
         this.startTime = null;
         this.timeout = null;
-        this.isPinggy = isPinggy;
+        this._isPinggy = null; // Cached Pinggy status
+    }
+
+    get isPinggy() {
+        if (this._isPinggy === null) {
+            this._isPinggy = window.location.href.includes("a.free.pinggy.link");
+            logger.log(`Pinggy tunnel detected: ${this._isPinggy}`);
+        }
+        return this._isPinggy;
     }
 
     start() {
@@ -85,19 +114,24 @@ class Timer {
         clearTimeout(this.timeout);
         this.element.innerText = t.connecting;
 
-        const currentUrl = window.location.href;
-        this.isPinggy = currentUrl.includes("a.free.pinggy.link");
         const timerFile = this.isPinggy ? TIMER_FILES.PINGGY : TIMER_FILES.DEFAULT;
 
         try {
             const response = await fetch(timerFile);
-            if (!response.ok) throw new Error(`Error fetching timer: ${response.status} ${response.statusText}`);
+            if (!response.ok) {
+                throw new Error(`Error fetching timer: ${response.status} ${response.statusText}`);
+            }
+
             const text = await response.text();
             this.startTime = parseInt(text);
-            if (isNaN(this.startTime)) throw new Error("Invalid timer value: NaN");
+
+            if (isNaN(this.startTime)) {
+                throw new Error("Invalid timer value: NaN");
+            }
+
             this.update();
         } catch (error) {
-            console.error("Error refreshing timer:", error);
+            logger.error(`Error refreshing timer: ${error.message}`);
             this.element.innerText = t.error + error.message;
         }
     }
@@ -135,7 +169,7 @@ function traverseShadowDOM(root, callback) {
     });
 }
 
-// Modern audio element detection
+// Audio element detection
 function findAudioElement() {
     // Gradio 3.x
     const legacyAudio = gradioApp().querySelector("#audio_notification > audio");
@@ -143,7 +177,7 @@ function findAudioElement() {
 
     // Mobile
     const mobileSelectors = [
-        '[aria-label="Play audio"]', 
+        '[aria-label="Play audio"]',
         '.mobile-audio-player',
         'audio[controls]:not([hidden])'
     ];
@@ -177,24 +211,27 @@ function findAudioElement() {
         }
     }
 
-    console.error("Audio element not found in DOM structure");
+    logger.error("Audio element not found in DOM structure");
     return null;
 }
 
 // Toggle functions
 function toggleNotification(button, image) {
     const audio = findAudioElement();
-    if (!audio) return;
+    if (!audio) {
+        logger.warn("No audio element found for notification toggle");
+        return;
+    }
 
     const activateAudio = () => {
         const newMutedState = !audio.muted;
         audio.muted = newMutedState;
         audio.currentTime = 0;
-        
+
         if (newMutedState) {
             audio.pause();
         } else {
-            audio.play().catch(e => console.error("Playback error:", e));
+            audio.play().catch(e => logger.error(`Playback error: ${e.message}`));
         }
 
         button.title = newMutedState ? t.unmuteTooltip : t.muteTooltip;
@@ -207,7 +244,7 @@ function toggleNotification(button, image) {
     if (/Mobi|Android/i.test(navigator.userAgent)) {
         activateAudio();
         if (!audio.muted) {
-            audio.play()
+            audio.play().catch(e => logger.error(`Mobile playback error: ${e.message}`));
         }
     } else {
         activateAudio();
@@ -217,6 +254,12 @@ function toggleNotification(button, image) {
 function toggleNSFWBlur(button, image) {
     const t2iGallery = gradioApp().querySelector("#txt2img_gallery_container");
     const i2iGallery = gradioApp().querySelector("#img2img_gallery_container");
+
+    if (!t2iGallery || !i2iGallery) {
+        logger.warn("Gallery containers not found for NSFW blur toggle");
+        return;
+    }
+
     const isBlurred = button.classList.toggle("nsfw_blurred");
 
     button.title = isBlurred ? t.unblurTooltip : t.blurTooltip;
@@ -232,9 +275,14 @@ function createTimer() {
     const app = gradioApp();
     const quickSettings = app.querySelector("#quicksettings");
 
+    if (!quickSettings) {
+        logger.error("Quick settings element not found");
+        return;
+    }
+
     // Create main div
     const mainDiv = createElement("div", "anxety-timer justify-start", {
-        style: "display: flex; gap: 6px; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; margin-block: -8px; align-items: center;" // remove: z-index: 999;
+        style: "display: flex; gap: 6px; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; margin-block: -8px; align-items: center;"
     });
 
     // Timer
@@ -299,10 +347,12 @@ function createTimer() {
             }
         `;
         document.head.appendChild(style);
+        // logger.log("NSFW blur CSS injected");
     }
 
     // INIT
     quickSettings.parentNode.insertBefore(mainDiv, quickSettings.nextSibling);
+    logger.log("Timer UI initialized successfully");
 }
 
 onUiLoaded(createTimer);
