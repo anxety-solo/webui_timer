@@ -1,27 +1,18 @@
-// Logger class for consistent logging
+// ===== Logger Module =====
 class Logger {
     constructor(prefix) {
         this.prefix = prefix;
     }
-
-    log(message) {
-        console.log(`[${this.prefix}]: ${message}`);
-    }
-
-    error(message) {
-        console.error(`[${this.prefix}]: ${message}`);
-    }
-
-    warn(message) {
-        console.warn(`[${this.prefix}]: ${message}`);
-    }
+    log(msg) { console.log(`[${this.prefix}]: ${msg}`); }
+    warn(msg) { console.warn(`[${this.prefix}]: ${msg}`); }
+    error(msg) { console.error(`[${this.prefix}]: ${msg}`); }
 }
 
-const logger = new Logger('WebUI-Timer');
+const logger = new Logger("WebUI-Timer");
 
-// Language settings
-const translationsTimer = {
-    "en": {
+// ===== Translations =====
+const TRANSLATIONS = {
+    en: {
         connecting: "Connecting...",
         refreshTooltip: "Click to refresh.",
         muteTooltip: "Currently not-muted. Click to mute.",
@@ -30,9 +21,9 @@ const translationsTimer = {
         unblurTooltip: "Toggle NSFW Blur. Click to unblur.",
         civitaiTooltip: "Go to CivitAI.",
         pinggyMessage: "Recreate the Pinggy tunnel!",
-        error: "Error: ",
+        error: "Error: "
     },
-    "ru": {
+    ru: {
         connecting: "Подключение...",
         refreshTooltip: "Нажмите, чтобы обновить.",
         muteTooltip: "Звук включен. Нажмите, чтобы отключить.",
@@ -41,15 +32,15 @@ const translationsTimer = {
         unblurTooltip: "Переключить размытие NSFW. Нажмите, чтобы убрать размытие.",
         civitaiTooltip: "Перейти на CivitAI.",
         pinggyMessage: "Пересоздайте туннель Pinggy!",
-        error: "Ошибка: ",
-    },
+        error: "Ошибка: "
+    }
 };
 
 // Detect User Language
-const userLang = (navigator.language || navigator.userLanguage).split('-')[0];
-const t = translationsTimer[userLang] || translationsTimer["en"];
+const lang = (navigator.language || navigator.userLanguage).split('-')[0];
+const t = TRANSLATIONS[lang] || TRANSLATIONS.en;
 
-// Constants
+// ===== Constants =====
 const BASEPATH = document.currentScript.src.split('file=')[1].split('/').slice(0, 2).join('/');
 const ICONS = {
     CLOCK: `file=${BASEPATH}/__files__/icon/clock.svg`,
@@ -62,7 +53,7 @@ const ICONS = {
 const CIVITAI_URL = "https://civitai.com/models";
 const TIMER_FILES = {
     DEFAULT: "file=static/timer.txt",
-    PINGGY: "file=static/timer-pinggy.txt",
+    PINGGY: "file=static/timer-pinggy.txt"
 };
 
 // Timer class
@@ -282,12 +273,12 @@ function createTimer() {
 
     // Create main div
     const mainDiv = createElement("div", "anxety-timer justify-start", {
-        style: "display: flex; gap: 6px; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; margin-block: -8px; align-items: center;"
+        style: "box-sizing: border-box; display: flex; gap: 6px; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; margin-block: -8px; align-items: center;"
     });
 
     // Timer
     const timerDiv = createElement("div", "gr-box", {
-        style: "display: flex; gap: 0.3rem; align-items: center; padding: 3px 5px; border: solid 1px #00FFFF; border-radius: 10px; background-color: #00FFFF1A !important; cursor: pointer;",
+        style: "box-sizing: border-box; display: flex; gap: 0.3rem; align-items: center; padding: 3px 5px; border: solid 1px #00FFFF; border-radius: 10px; background-color: #00FFFF1A !important; cursor: pointer;",
         title: t.refreshTooltip
     });
     const timerImage = createElement("img", "", { src: ICONS.CLOCK, width: 24 });
@@ -302,7 +293,7 @@ function createTimer() {
 
     // Audio notification
     const audioDiv = createElement("div", "gr-box", {
-        style: "transition: all 0.15s ease; display: flex; align-items: center; padding: 5px; border: solid 1px #00FF8C; border-radius: 10px; background-color: #00FF8C1A !important; cursor: pointer;",
+        style: "transition: all 0.15s ease; box-sizing: border-box; display: flex; align-items: center; padding: 5px; border: solid 1px #00FF8C; border-radius: 10px; background-color: #00FF8C1A !important; cursor: pointer;",
         title: t.muteTooltip
     });
     const audioImage = createElement("img", "", { src: ICONS.ALARM_BELL, width: 20 });
@@ -312,7 +303,7 @@ function createTimer() {
 
     // NSFW Blur
     const nsfwDiv = createElement("div", "gr-box", {
-        style: "transition: all 0.15s ease; display: flex; align-items: center; padding: 5px; border: solid 1px #00FF8C; border-radius: 10px; background-color: #00FF8C1A !important; cursor: pointer;",
+        style: "transition: all 0.15s ease; box-sizing: border-box; display: flex; align-items: center; padding: 5px; border: solid 1px #00FF8C; border-radius: 10px; background-color: #00FF8C1A !important; cursor: pointer;",
         title: t.blurTooltip
     });
     const nsfwImage = createElement("img", "", { src: ICONS.EYE, width: 20 });
@@ -322,7 +313,7 @@ function createTimer() {
 
     // CivitAI link
     const civitDiv = createElement("div", "gr-box", {
-        style: "display: flex; align-items: center; padding: 5px; border: solid 1px #3399FF; border-radius: 10px; background-color: #3399FF1A !important; cursor: pointer;",
+        style: "box-sizing: border-box; display: flex; align-items: center; padding: 5px; border: solid 1px #3399FF; border-radius: 10px; background-color: #3399FF1A !important; cursor: pointer;",
         title: t.civitaiTooltip
     });
     const civitImage = createElement("img", "", { src: ICONS.CIVITAI, width: 20 });
